@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fasum1/l10n/app_localizations.dart';
 import 'package:fasum1/screens/add_post_screen.dart';
 import 'package:fasum1/screens/detail_screen.dart';
+import 'package:fasum1/screens/settings_screen.dart';
 import 'package:fasum1/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,37 +19,40 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String? selectedCategory;
 
-  List<String> categories = [
-    'Jalan Rusak',
-    'Marka Pudar',
-    'Lampu Mati',
-    'Trotoar Rusak',
-    'Rambu Rusak',
-    'Jembatan Rusak',
-    'Sampah Menumpuk',
-    'Saluran Tersumbat',
-    'Sungai Tercemar',
-    'Sampah Sungai',
-    'Pohon Tumbang',
-    'Taman Rusak',
-    'Fasilitas Rusak',
-    'Pipa Bocor',
-    'Vandalisme',
-    'Banjir',
-    'Lainnya',
-  ];
+  List<String> get categories {
+    final localizations = AppLocalizations.of(context);
+    return [
+      localizations.categoryJalanRusak,
+      localizations.categoryMarkaPudar,
+      localizations.categoryLampuMati,
+      localizations.categoryTrotoarRusak,
+      localizations.categoryRambuRusak,
+      localizations.categoryJembatanRusak,
+      localizations.categorySampahMenumpuk,
+      localizations.categorySaluranTersumbat,
+      localizations.categorySungaiTercemar,
+      localizations.categorySampahSungai,
+      localizations.categoryPohonTumbang,
+      localizations.categoryTamanRusak,
+      localizations.categoryFasilitasRusak,
+      localizations.categoryPipaBocor,
+      localizations.categoryVandalisme,
+      localizations.categoryBanjir,
+      localizations.categoryLainnya,
+    ];
+  }
 
   String formatTime(DateTime dateTime) {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
     if (diff.inSeconds < 60) {
-      return '${diff.inSeconds} secs ago';
+      return AppLocalizations.of(context).secondsAgo(diff.inSeconds);
     } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes} mins ago';
+      return AppLocalizations.of(context).minutesAgo(diff.inMinutes);
     } else if (diff.inHours < 24) {
-      return '${diff.inHours} hrs ago';
+      return AppLocalizations.of(context).hoursAgo(diff.inHours);
     } else if (diff.inHours < 48) {
-      return '1 day ago';
+      return AppLocalizations.of(context).oneDayAgo;
     } else {
       return DateFormat('dd/MM/yyyy').format(dateTime);
     }
@@ -59,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => SignInScreen()),
-      (route) => false, // Hapus semua route sebelumnya
+      (route) => false,
     );
   }
 
@@ -79,12 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.clear),
-                  title: const Text('Semua Kategori'),
-                  onTap:
-                      () => Navigator.pop(
-                        context,
-                        null,
-                      ), // Null untuk memilih semua kategori
+                  title: Text(AppLocalizations.of(context).allCategories),
+                  onTap: () => Navigator.pop(context, null),
                 ),
                 const Divider(),
                 ...categories.map(
@@ -97,11 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Theme.of(context).colorScheme.primary,
                             )
                             : null,
-                    onTap:
-                        () => Navigator.pop(
-                          context,
-                          category,
-                        ), // Kategori yang dipilih
+                    onTap: () => Navigator.pop(context, category),
                   ),
                 ),
               ],
@@ -111,22 +108,14 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
 
-    if (result != null) {
-      setState(() {
-        selectedCategory =
-            result; // Set kategori yang dipilih atau null untuk Semua Kategori
-      });
-    } else {
-      // Jika result adalah null, berarti memilih Semua Kategori
-      setState(() {
-        selectedCategory =
-            null; // Reset ke null untuk menampilkan semua kategori
-      });
-    }
+    setState(() {
+      selectedCategory = result;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -141,13 +130,22 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             onPressed: _showCategoryFilter,
             icon: const Icon(Icons.filter_list),
-            tooltip: 'Filter Kategori',
+            tooltip: localizations.filterCategory,
           ),
           IconButton(
             onPressed: () {
-              signOut();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
             },
+            icon: const Icon(Icons.settings),
+            tooltip: localizations.settings,
+          ),
+          IconButton(
+            onPressed: signOut,
             icon: const Icon(Icons.logout),
+            tooltip: localizations.signOut,
           ),
         ],
       ),
@@ -168,15 +166,14 @@ class _HomeScreenState extends State<HomeScreen> {
             final posts =
                 snapshot.data!.docs.where((doc) {
                   final data = doc.data();
-                  final category = data['category'] ?? 'Lainnya';
+                  final category =
+                      data['category'] ?? localizations.categoryLainnya;
                   return selectedCategory == null ||
                       selectedCategory == category;
                 }).toList();
 
             if (posts.isEmpty) {
-              return const Center(
-                child: Text("Tidak ada laporan untuk kategori ini."),
-              );
+              return Center(child: Text(localizations.noReportsInThisCategory));
             }
 
             return ListView.builder(
@@ -190,9 +187,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 final fullName = data['fullName'] ?? 'Anonim';
                 final latitude = data['latitude'];
                 final longitude = data['longitude'];
-                final category = data['category'] ?? 'Lainnya';
+                final category =
+                    data['category'] ?? localizations.categoryLainnya;
                 final createdAt = DateTime.parse(createdAtStr);
-                String heroTag =
+                final heroTag =
                     'fasum-image-${createdAt.millisecondsSinceEpoch}';
 
                 return InkWell(
@@ -248,31 +246,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    fullName,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    formatTime(createdAt),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    description ?? '',
-                                    style: const TextStyle(fontSize: 16),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                              Text(
+                                fullName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                formatTime(createdAt),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                description ?? '',
+                                style: const TextStyle(fontSize: 16),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),

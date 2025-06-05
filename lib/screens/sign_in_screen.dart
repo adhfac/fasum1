@@ -1,3 +1,4 @@
+import 'package:fasum1/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,8 +21,10 @@ class SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
+      appBar: AppBar(title: Text(loc.signIn)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -34,16 +37,16 @@ class SignInScreenState extends State<SignInScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email),
+                    decoration: InputDecoration(
+                      labelText: loc.email,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.email),
                     ),
                     validator: (value) {
                       if (value == null ||
                           value.isEmpty ||
                           !_isValidEmail(value)) {
-                        return 'Please enter a valid email';
+                        return loc.pleaseEnterValidEmail;
                       }
                       return null;
                     },
@@ -53,7 +56,7 @@ class SignInScreenState extends State<SignInScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: loc.password,
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
@@ -71,7 +74,7 @@ class SignInScreenState extends State<SignInScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return loc.pleaseEnterPassword;
                       }
                       return null;
                     },
@@ -81,7 +84,7 @@ class SignInScreenState extends State<SignInScreen> {
                       ? const CircularProgressIndicator()
                       : ElevatedButton(
                         onPressed: _signIn,
-                        child: const Text('Sign In'),
+                        child: Text(loc.signIn),
                       ),
                   const SizedBox(height: 16.0),
                   RichText(
@@ -91,9 +94,9 @@ class SignInScreenState extends State<SignInScreen> {
                         color: Colors.black,
                       ),
                       children: [
-                        const TextSpan(text: "Don't have an account? "),
+                        TextSpan(text: "${loc.dontHaveAccount} "),
                         TextSpan(
-                          text: "Sign Up",
+                          text: loc.signUp,
                           style: const TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
@@ -141,7 +144,9 @@ class SignInScreenState extends State<SignInScreen> {
     } on FirebaseAuthException catch (error) {
       _showSnackBar(_getAuthErrorMessage(error.code));
     } catch (error) {
-      _showSnackBar('An error occurred: $error');
+      _showSnackBar(
+        AppLocalizations.of(context)!.errorOccurred(error.toString()),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -160,13 +165,16 @@ class SignInScreenState extends State<SignInScreen> {
   }
 
   String _getAuthErrorMessage(String code) {
+    final loc = AppLocalizations.of(context)!;
     switch (code) {
       case 'user-not-found':
-        return 'No user found with that email';
+        return loc.noUserFound;
       case 'wrong-password':
-        return 'Wrong password. Please try again.';
+        return loc.wrongPassword;
+      case 'invalid-email':
+        return loc.invalidEmail;
       default:
-        return 'An error occurred. Please try again.';
+        return loc.genericError;
     }
   }
 }

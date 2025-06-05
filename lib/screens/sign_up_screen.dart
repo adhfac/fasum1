@@ -1,3 +1,4 @@
+import 'package:fasum1/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,8 +24,10 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign Up')),
+      appBar: AppBar(title: Text(loc.signUp)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -32,20 +35,19 @@ class SignUpScreenState extends State<SignUpScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 32.0),
                   TextFormField(
                     controller: _fullNameController,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Full Name',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.person),
+                    decoration: InputDecoration(
+                      labelText: loc.fullName,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.person),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your full name';
+                        return loc.pleaseEnterFullName;
                       }
                       return null;
                     },
@@ -54,16 +56,16 @@ class SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email),
+                    decoration: InputDecoration(
+                      labelText: loc.email,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.email),
                     ),
                     validator: (value) {
                       if (value == null ||
                           value.isEmpty ||
                           !_isValidEmail(value)) {
-                        return 'Please enter a valid email';
+                        return loc.pleaseEnterValidEmail;
                       }
                       return null;
                     },
@@ -73,7 +75,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: loc.password,
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
@@ -82,19 +84,18 @@ class SignUpScreenState extends State<SignUpScreen> {
                               ? Icons.visibility
                               : Icons.visibility_off,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
+                        onPressed:
+                            () => setState(
+                              () => _isPasswordVisible = !_isPasswordVisible,
+                            ),
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                        return loc.pleaseEnterPassword;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return loc.passwordTooShort;
                       }
                       return null;
                     },
@@ -104,7 +105,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                     controller: _confirmPasswordController,
                     obscureText: !_isConfirmPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: loc.confirmPassword,
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
@@ -113,20 +114,20 @@ class SignUpScreenState extends State<SignUpScreen> {
                               ? Icons.visibility
                               : Icons.visibility_off,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _isConfirmPasswordVisible =
-                                !_isConfirmPasswordVisible;
-                          });
-                        },
+                        onPressed:
+                            () => setState(
+                              () =>
+                                  _isConfirmPasswordVisible =
+                                      !_isConfirmPasswordVisible,
+                            ),
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
+                        return loc.pleaseConfirmPassword;
                       }
                       if (value != _passwordController.text) {
-                        return 'Passwords do not match';
+                        return loc.passwordsDoNotMatch;
                       }
                       return null;
                     },
@@ -136,7 +137,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                       ? const CircularProgressIndicator()
                       : ElevatedButton(
                         onPressed: _signUp,
-                        child: const Text('Sign Up'),
+                        child: Text(loc.signUp),
                       ),
                 ],
               ),
@@ -176,7 +177,9 @@ class SignUpScreenState extends State<SignUpScreen> {
     } on FirebaseAuthException catch (error) {
       _showErrorMessage(_getAuthErrorMessage(error.code));
     } catch (error) {
-      _showErrorMessage('An error occurred: $error');
+      _showErrorMessage(
+        AppLocalizations.of(context)!.errorOccurred(error.toString()),
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -195,15 +198,16 @@ class SignUpScreenState extends State<SignUpScreen> {
   }
 
   String _getAuthErrorMessage(String code) {
+    final loc = AppLocalizations.of(context)!;
     switch (code) {
       case 'weak-password':
-        return 'The password provided is too weak.';
+        return loc.weakPassword;
       case 'email-already-in-use':
-        return 'The account already exists for that email.';
+        return loc.emailAlreadyInUse;
       case 'invalid-email':
-        return 'The email address is not valid.';
+        return loc.invalidEmail;
       default:
-        return 'An error occurred. Please try again.';
+        return loc.genericError;
     }
   }
 

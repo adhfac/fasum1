@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fasum1/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -28,25 +29,28 @@ class _AddPostScreenState extends State<AddPostScreen> {
   String? _aiDescription;
   bool _isGenerating = false;
 
-  List<String> categories = [
-    'Jalan Rusak',
-    'Marka Pudar',
-    'Lampu Mati',
-    'Trotoar Rusak',
-    'Rambu Rusak',
-    'Jembatan Rusak',
-    'Sampah Menumpuk',
-    'Saluran Tersumbat',
-    'Sungai Tercemar',
-    'Sampah Sungai',
-    'Pohon Tumbang',
-    'Taman Rusak',
-    'Fasilitas Rusak',
-    'Pipa Bocor',
-    'Vandalisme',
-    'Banjir',
-    'Lainnya',
-  ];
+  List<String> get categories {
+    final localizations = AppLocalizations.of(context);
+    return [
+      localizations.categoryJalanRusak,
+      localizations.categoryMarkaPudar,
+      localizations.categoryLampuMati,
+      localizations.categoryTrotoarRusak,
+      localizations.categoryRambuRusak,
+      localizations.categoryJembatanRusak,
+      localizations.categorySampahMenumpuk,
+      localizations.categorySaluranTersumbat,
+      localizations.categorySungaiTercemar,
+      localizations.categorySampahSungai,
+      localizations.categoryPohonTumbang,
+      localizations.categoryTamanRusak,
+      localizations.categoryFasilitasRusak,
+      localizations.categoryPipaBocor,
+      localizations.categoryVandalisme,
+      localizations.categoryBanjir,
+      localizations.categoryLainnya,
+    ];
+  }
 
   void _showCategorySelection() {
     showModalBottomSheet(
@@ -112,9 +116,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to compress image: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).failedToCompressImage(e.toString()),
+            ),
+          ),
+        );
       }
     }
   }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:fasum1/l10n/app_localizations.dart';
 import 'package:fasum1/screens/full_image_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -40,19 +41,22 @@ class _DetailScreenState extends State<DetailScreen> {
     if (!mounted) return;
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tidak bisa membuka Google Maps')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.unableToOpenMaps)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     final createdAtFormatted = DateFormat(
       'dd MMMM yyyy, HH:mm',
+      localizations.localeName, // supaya format tanggal sesuai locale
     ).format(widget.createdAt);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Laporan')),
+      appBar: AppBar(title: Text(localizations.reportDetail)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +88,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         ),
                       );
                     },
-                    tooltip: 'Lihat gambar penuh',
+                    tooltip: localizations.viewFullImage,
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.black45,
                     ),
@@ -114,7 +118,11 @@ class _DetailScreenState extends State<DetailScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  widget.category,
+                                  // Ambil kategori terjemahan sesuai key ARB
+                                  localizationsCategory(
+                                    widget.category,
+                                    localizations,
+                                  ),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -148,7 +156,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           size: 38,
                           color: Colors.lightGreen,
                         ),
-                        tooltip: "Buka di Google Maps",
+                        tooltip: localizations.openInGoogleMaps,
                       ),
                     ],
                   ),
@@ -164,5 +172,51 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
       ),
     );
+  }
+}
+
+/// Fungsi untuk mapping kategori dari key ke terjemahan yang ada di ARB.
+/// Contoh key: "categoryJalanRusak", value: "Damaged Road"
+String localizationsCategory(
+  String categoryKey,
+  AppLocalizations localizations,
+) {
+  switch (categoryKey) {
+    case 'categoryJalanRusak':
+      return localizations.categoryJalanRusak;
+    case 'categoryMarkaPudar':
+      return localizations.categoryMarkaPudar;
+    case 'categoryLampuMati':
+      return localizations.categoryLampuMati;
+    case 'categoryTrotoarRusak':
+      return localizations.categoryTrotoarRusak;
+    case 'categoryRambuRusak':
+      return localizations.categoryRambuRusak;
+    case 'categoryJembatanRusak':
+      return localizations.categoryJembatanRusak;
+    case 'categorySampahMenumpuk':
+      return localizations.categorySampahMenumpuk;
+    case 'categorySaluranTersumbat':
+      return localizations.categorySaluranTersumbat;
+    case 'categorySungaiTercemar':
+      return localizations.categorySungaiTercemar;
+    case 'categorySampahSungai':
+      return localizations.categorySampahSungai;
+    case 'categoryPohonTumbang':
+      return localizations.categoryPohonTumbang;
+    case 'categoryTamanRusak':
+      return localizations.categoryTamanRusak;
+    case 'categoryFasilitasRusak':
+      return localizations.categoryFasilitasRusak;
+    case 'categoryPipaBocor':
+      return localizations.categoryPipaBocor;
+    case 'categoryVandalisme':
+      return localizations.categoryVandalisme;
+    case 'categoryBanjir':
+      return localizations.categoryBanjir;
+    case 'categoryLainnya':
+      return localizations.categoryLainnya;
+    default:
+      return categoryKey; // fallback: tampilkan apa adanya
   }
 }
