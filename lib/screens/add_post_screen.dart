@@ -353,7 +353,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a picture'),
+                title: Text(loc.takePicture),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -369,7 +369,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.cancel),
-                title: const Text('Cancel'),
+                title: Text(loc.cancel),
                 onTap: () => Navigator.pop(context),
               ),
             ],
