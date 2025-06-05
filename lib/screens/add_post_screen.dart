@@ -204,6 +204,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
   Future<void> _getLocation() async {
+    final loc = AppLocalizations.of(context);
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -219,7 +220,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         if (permission == LocationPermission.deniedForever ||
             permission == LocationPermission.denied) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Location permissions are denied.')),
+            SnackBar(content: Text(loc.locationPermissionsDenied)),
           );
           return;
         }
@@ -236,7 +237,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     } catch (e) {
       debugPrint('Failed to retrieve location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to retrieve location: $e')),
+        SnackBar(content: Text(loc.failedToRetrieveLocation(e.toString()))),
       );
       setState(() {
         _latitude = null;
@@ -246,6 +247,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
   Future<void> sendNotificationToTopic(String body, String senderName) async {
+    final loc = AppLocalizations.of(context);
     final url = Uri.parse('https://cloudmes.vercel.app/send-to-topic');
     final response = await http.post(
       url,
@@ -262,20 +264,25 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
     if (response.statusCode == 200) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Notifikasi berhasil dikirim')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(loc.notificationSent)));
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Gagal kirim notifikasi: ${response.body}')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).notificationFailed(response.body),
+            ),
+          ),
         );
       }
     }
   }
 
   Future<void> _submitPost() async {
+    final loc = AppLocalizations.of(context);
     if (_base64Image == null || _descriptionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please add an image and description.')),
@@ -290,9 +297,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
     if (uid == null) {
       setState(() => _isUploading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User not found. Please sign in.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(loc.noUserFound)));
       return;
     }
 
@@ -326,9 +333,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
       debugPrint('Upload failed: $e');
       if (!mounted) return;
       setState(() => _isUploading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to upload the post: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.failedToUploadPost(e.toString()))),
+      );
     } finally {
       if (mounted) {
         setState(() => _isUploading = false);
@@ -337,6 +344,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
   void _showImageSourceDialog() {
+    final loc = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -353,7 +361,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from gallery'),
+                title: Text(loc.chooseFromGallery),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -373,6 +381,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text('Add Post')),
       body: SingleChildScrollView(
@@ -464,7 +473,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     if (_image != null)
                       IconButton(
                         icon: const Icon(Icons.refresh),
-                        tooltip: 'Generate another description',
+                        tooltip: loc.generateAnotherDescription,
                         onPressed: _generateDescriptionWithAI,
                       ),
                   ],
@@ -482,7 +491,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     textCapitalization: TextCapitalization.sentences,
                     maxLines: 6,
                     decoration: InputDecoration(
-                      hintText: 'Add a brief description...',
+                      hintText: loc.addBriefDescription,
                       border: OutlineInputBorder(),
                     ),
                   ),
